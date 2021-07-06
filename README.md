@@ -12,4 +12,4 @@ For example, `./gradlew build`
 
 4. Go to extracted app/bin directory and execute using app / app.bat. Pass the two inputs as arguments.
 
-For example, `./app <path-to-city-json> <origin-city-id>`
+For example, `./app <path-to-city-json-file> <origin-city-id>`
