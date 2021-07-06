@@ -49,10 +49,7 @@ public final class Hop {
         } else if (!toCity.equals(other.toCity))
             return false;
         if (fromCity == null) {
-            if (other.fromCity != null)
-                return false;
-        } else if (!fromCity.equals(other.fromCity))
-            return false;
-        return true;
+            return other.fromCity == null;
+        } else return fromCity.equals(other.fromCity);
     }
 }

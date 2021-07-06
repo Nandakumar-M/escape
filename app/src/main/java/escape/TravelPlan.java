@@ -31,11 +31,6 @@ public final class TravelPlan {
         return new TravelPlan(copyHops);
     }
 
-    // public Set<String> getVisitedContinentIds() {
-    // return
-    // this.hops.stream().map(Hop::getFromCity).map(City::getId).collect(Collectors.toSet());
-    // }
-
     public boolean alreadyVisited(String continentId) {
         return this.hops.stream().map(Hop::getFromCity).anyMatch(city -> city.getContinentId().equals(continentId));
     }

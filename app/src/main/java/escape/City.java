@@ -9,7 +9,7 @@ public final class City {
     private final double longitude;
 
     public City(final String id, final String name, final String continentId, final double latitude,
-            final double longitude) {
+                final double longitude) {
         this.id = id;
         this.name = name;
         this.continentId = continentId;
@@ -62,10 +62,7 @@ public final class City {
             return false;
         final City other = (City) obj;
         if (id == null) {
-            if (other.id != null)
-                return false;
-        } else if (!id.equals(other.id))
-            return false;
-        return true;
+            return other.id == null;
+        } else return id.equals(other.id);
     }
 }

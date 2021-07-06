@@ -1,18 +1,13 @@
 package escape;
 
+import org.json.JSONObject;
+import org.json.JSONTokener;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
-
-import org.json.JSONObject;
-import org.json.JSONTokener;
 
 public class TravelPlanner {
 
@@ -22,7 +17,6 @@ public class TravelPlanner {
     private final EarthDistanceCalculator calculator = new EarthDistanceCalculator();
 
     private final HashMap<String, City> allCitiesById = new HashMap<>();
-    private final HashMap<String, List<City>> allCitiesByContinentId = new HashMap<>();
 
     // List<Hop> will be sorted by it's distance.
     private final HashMap<String, List<Hop>> hopsByCityId = new HashMap<>();
@@ -44,9 +38,8 @@ public class TravelPlanner {
 
                 final City city = new City(id, name, continentId, latitude, longitude);
                 allCitiesById.put(id, city);
-                if (allCitiesByContinentId.get(continentId) == null) {
-                    allCitiesByContinentId.put(continentId, new ArrayList<>());
-                }
+                HashMap<String, List<City>> allCitiesByContinentId = new HashMap<>();
+                allCitiesByContinentId.computeIfAbsent(continentId, k -> new ArrayList<>());
                 allCitiesByContinentId.get(continentId).add(city);
             }
 
@@ -59,7 +52,7 @@ public class TravelPlanner {
 
         final TravelPlan plan = new TravelPlan();
         final City origin = getCityById(originCityId);
-        final long endTime = System.currentTimeMillis() + maxTimeInSeconds * 1000;
+        final long endTime = System.currentTimeMillis() + maxTimeInSeconds * 1000L;
 
         findBestPlan(plan, origin, endTime);
 
@@ -86,7 +79,7 @@ public class TravelPlanner {
             }
             return;
         }
-        hops.stream().forEach(hop -> {
+        hops.forEach(hop -> {
             TravelPlan next = plan.addHop(hop);
             findBestPlan(next, hop.getToCity(), endTime);
         });
@@ -101,23 +94,20 @@ public class TravelPlanner {
             return hopsByCityId.get(currentCity.getId());
         }
         final List<Hop> hops = allCitiesById.values().stream()
-                .filter(nextCity -> nextCity.getContinentId() != currentCity.getContinentId())
-                .map(nextCity -> new Hop(currentCity, nextCity)).collect(Collectors.toList());
+                .filter(nextCity -> !nextCity.getContinentId().equals(currentCity.getContinentId()))
+                .map(nextCity -> new Hop(currentCity, nextCity)).sorted((h1, h2) -> {
+                    Double d1 = getHopDistance(h1);
+                    Double d2 = getHopDistance(h2);
+                    return d1.compareTo(d2);
+                }).collect(Collectors.toList());
 
-        hops.sort(new Comparator<Hop>() {
-            public int compare(Hop h1, Hop h2) {
-                Double d1 = getHopDistance(h1);
-                Double d2 = getHopDistance(h2);
-                return d1.compareTo(d2);
-            };
-        });
         hopsByCityId.put(currentCity.getId(), Collections.unmodifiableList(hops));
         return hopsByCityId.get(currentCity.getId());
     }
 
     private double getPlanDistance(final TravelPlan finalPlan) {
 
-        return finalPlan.getHops().stream().map(hop -> getHopDistance(hop)).reduce(Double::sum).orElse(0d);
+        return finalPlan.getHops().stream().map(this::getHopDistance).reduce(Double::sum).orElse(0d);
 
     }
 
