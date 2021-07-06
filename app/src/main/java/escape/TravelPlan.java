@@ -40,11 +40,20 @@ public final class TravelPlan {
         StringBuilder builder = new StringBuilder();
         this.hops.forEach(h -> {
             City city = h.getFromCity();
+            City toCity = h.getToCity();
             builder.append(city.getId());
             builder.append(" (");
             builder.append(city.getName());
             builder.append(", ");
             builder.append(city.getContinentId());
+            builder.append(" -> ");
+
+            builder.append(toCity.getId());
+            builder.append(" (");
+            builder.append(toCity.getName());
+            builder.append(", ");
+            builder.append(toCity.getContinentId());
+
             builder.append(")\n");
         });
         return builder.toString();
